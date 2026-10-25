@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: invoice-agent
+    runtime: python
+    plan: starter            # free tier sleeps (cold start > 45s) and has no disk
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /.well-known/agent-card.json
+    disk:
+      name: agent-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DB_PATH
+        value: /data/agent.db
+      - key: BASE_PATH
+        value: /a2a
+      - key: PUBLIC_BASE_URL
+        sync: false          # https://<service-name>.onrender.com/a2a
+      - key: LLM_BASE_URL
+        value: https://api.openai.com/v1
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: LLM_API_KEY
+        sync: false
